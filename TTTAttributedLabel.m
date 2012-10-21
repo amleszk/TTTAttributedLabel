@@ -758,18 +758,17 @@ static inline NSAttributedString * NSAttributedStringBySettingColorFromContext(N
         CGFloat yOffset = 0.0f;
         switch (self.verticalAlignment) {
             case TTTAttributedLabelVerticalAlignmentTop:
-                heightChange = 0.0f;
+                textRect.size.height = textSize.height;
                 break;
             case TTTAttributedLabelVerticalAlignmentCenter:
-                yOffset = floorf((textRect.size.height - textSize.height) / 2.0f);
+                textRect.origin.y += floorf((textRect.size.height - textSize.height) / 2.0f);
+                textRect.size = CGSizeMake(textRect.size.width, textRect.size.height - heightChange + yOffset);
                 break;
             case TTTAttributedLabelVerticalAlignmentBottom:
-                yOffset = textRect.size.height - textSize.height;
+                textRect.origin.y += textRect.size.height - textSize.height;
+                textRect.size = CGSizeMake(textRect.size.width, textRect.size.height - heightChange + yOffset);
                 break;
         }
-        
-        textRect.origin.y += yOffset;
-        textRect.size = CGSizeMake(textRect.size.width, textRect.size.height - heightChange + yOffset);
     }
     
     return textRect;
