@@ -79,10 +79,10 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(TTTAttributed
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionary]; 
     
     CTFontRef font = CTFontCreateWithName((__bridge CFStringRef)label.font.fontName, label.font.pointSize, NULL);
-    [mutableAttributes setObject:(__bridge id)font forKey:(NSString *)kCTFontAttributeName];
+    mutableAttributes[(NSString *)kCTFontAttributeName] = (__bridge id)font;
     CFRelease(font);
     
-    [mutableAttributes setObject:(id)[label.textColor CGColor] forKey:(NSString *)kCTForegroundColorAttributeName];
+    mutableAttributes[(NSString *)kCTForegroundColorAttributeName] = (id)[label.textColor CGColor];
     
     CTTextAlignment alignment = CTTextAlignmentFromUITextAlignment(label.textAlignment);
     CGFloat lineSpacing = label.leading;
@@ -115,7 +115,7 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(TTTAttributed
 	};
 
     CTParagraphStyleRef paragraphStyle = CTParagraphStyleCreate(paragraphStyles, 10);
-	[mutableAttributes setObject:(__bridge id)paragraphStyle forKey:(NSString *)kCTParagraphStyleAttributeName];
+	mutableAttributes[(NSString *)kCTParagraphStyleAttributeName] = (__bridge id)paragraphStyle;
 	CFRelease(paragraphStyle);
     
     return [NSDictionary dictionaryWithDictionary:mutableAttributes];
@@ -223,16 +223,16 @@ static inline NSAttributedString * NSAttributedStringBySettingColorFromContext(N
 
 - (void)commonInit {
     self.dataDetectorTypes = UIDataDetectorTypeNone;
-    self.links = [NSArray array];
+    self.links = @[];
     
     NSMutableDictionary *mutableLinkAttributes = [NSMutableDictionary dictionary];
     [mutableLinkAttributes setValue:(id)[[UIColor blueColor] CGColor] forKey:(NSString*)kCTForegroundColorAttributeName];
-    [mutableLinkAttributes setValue:[NSNumber numberWithBool:YES] forKey:(NSString *)kCTUnderlineStyleAttributeName];
+    [mutableLinkAttributes setValue:@YES forKey:(NSString *)kCTUnderlineStyleAttributeName];
     self.linkAttributes = [NSDictionary dictionaryWithDictionary:mutableLinkAttributes];
     
     NSMutableDictionary *mutableActiveLinkAttributes = [NSMutableDictionary dictionary];
     [mutableActiveLinkAttributes setValue:(id)[[UIColor redColor] CGColor] forKey:(NSString*)kCTForegroundColorAttributeName];
-    [mutableActiveLinkAttributes setValue:[NSNumber numberWithBool:NO] forKey:(NSString *)kCTUnderlineStyleAttributeName];
+    [mutableActiveLinkAttributes setValue:@NO forKey:(NSString *)kCTUnderlineStyleAttributeName];
 
     self.activeLinkAttributes = [NSDictionary dictionaryWithDictionary:mutableActiveLinkAttributes];
     
@@ -330,7 +330,7 @@ static inline NSAttributedString * NSAttributedStringBySettingColorFromContext(N
 
 - (NSArray *)detectedLinksInString:(NSString *)string range:(NSRange)range error:(NSError **)error {
     if (!string || !self.dataDetector) {
-        return [NSArray array];
+        return @[];
     }
     
     return [self.dataDetector matchesInString:string options:0 range:range];
@@ -564,10 +564,10 @@ static inline NSAttributedString * NSAttributedStringBySettingColorFromContext(N
         
         for (id glyphRun in (__bridge NSArray *)CTLineGetGlyphRuns((__bridge CTLineRef)line)) {
             NSDictionary *attributes = (__bridge NSDictionary *)CTRunGetAttributes((__bridge CTRunRef) glyphRun);
-            CGColorRef strokeColor = (__bridge CGColorRef)[attributes objectForKey:kTTTBackgroundStrokeColorAttributeName];
-            CGColorRef fillColor = (__bridge CGColorRef)[attributes objectForKey:kTTTBackgroundFillColorAttributeName];
-            CGFloat cornerRadius = [[attributes objectForKey:kTTTBackgroundCornerRadiusAttributeName] floatValue];
-            CGFloat lineWidth = [[attributes objectForKey:kTTTBackgroundLineWidthAttributeName] floatValue];
+            CGColorRef strokeColor = (__bridge CGColorRef)attributes[kTTTBackgroundStrokeColorAttributeName];
+            CGColorRef fillColor = (__bridge CGColorRef)attributes[kTTTBackgroundFillColorAttributeName];
+            CGFloat cornerRadius = [attributes[kTTTBackgroundCornerRadiusAttributeName] floatValue];
+            CGFloat lineWidth = [attributes[kTTTBackgroundLineWidthAttributeName] floatValue];
 
             if (strokeColor || fillColor) {
                 CGRect runBounds = CGRectZero;
@@ -623,8 +623,8 @@ static inline NSAttributedString * NSAttributedStringBySettingColorFromContext(N
         
         for (id glyphRun in (__bridge NSArray *)CTLineGetGlyphRuns((__bridge CTLineRef)line)) {
             NSDictionary *attributes = (__bridge NSDictionary *)CTRunGetAttributes((__bridge CTRunRef) glyphRun);
-            BOOL strikeOut = [[attributes objectForKey:kTTTStrikeOutAttributeName] boolValue];
-            NSInteger superscriptStyle = [[attributes objectForKey:(id)kCTSuperscriptAttributeName] integerValue];
+            BOOL strikeOut = [attributes[kTTTStrikeOutAttributeName] boolValue];
+            NSInteger superscriptStyle = [attributes[(id)kCTSuperscriptAttributeName] integerValue];
             
             if (strikeOut) {
                 CGRect runBounds = CGRectZero;
@@ -656,7 +656,7 @@ static inline NSAttributedString * NSAttributedStringBySettingColorFromContext(N
 				}
                 
                 // Use text color, or default to black
-                id color = [attributes objectForKey:(id)kCTForegroundColorAttributeName];
+                id color = attributes[(id)kCTForegroundColorAttributeName];
 
                 if (color) {
                     CGContextSetStrokeColorWithColor(c, (__bridge CGColorRef)color);
@@ -688,7 +688,7 @@ static inline NSAttributedString * NSAttributedStringBySettingColorFromContext(N
     
     self.attributedText = text;
 
-    self.links = [NSArray array];
+    self.links = @[];
     if (self.dataDetectorTypes != UIDataDetectorTypeNone) {
         for (NSTextCheckingResult *result in [self detectedLinksInString:[self.attributedText string] range:NSMakeRange(0, [text length]) error:nil]) {
             [self addLinkWithTextCheckingResult:result];
